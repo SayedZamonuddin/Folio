@@ -246,7 +246,11 @@ export default function OnboardingPage() {
                 />
               </div>
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <div className="rounded-md border border-orange-200 bg-orange-50 px-4 py-3">
+                <p className="text-sm text-orange-800">{error}</p>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(3)}>Back</Button>
               <Button className="flex-1" disabled={loading} onClick={handleComplete}>

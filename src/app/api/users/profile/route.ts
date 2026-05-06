@@ -61,11 +61,29 @@ export async function POST(request: Request) {
 
     return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null }, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[POST /api/users/profile]", message);
+    console.error("[POST /api/users/profile]", err);
+
+    let message = "Something went wrong. Please try again.";
+    let status = 500;
+
+    if (err && typeof err === "object" && "code" in err) {
+      const prismaErr = err as { code: string; meta?: { target?: string[] } };
+      if (prismaErr.code === "P2002") {
+        const field = prismaErr.meta?.target?.[0];
+        if (field === "username") {
+          message = "This username is already taken. Please choose a different one.";
+        } else if (field === "email") {
+          message = "An account with this email already exists.";
+        } else {
+          message = "This information is already in use. Please try different values.";
+        }
+        status = 409;
+      }
+    }
+
     return NextResponse.json<ApiResponse<null>>(
       { data: null, error: { message, code: "CREATE_FAILED" } },
-      { status: 500 }
+      { status }
     );
   }
 }
@@ -99,10 +117,18 @@ export async function PATCH(request: Request) {
   if (body.showResume !== undefined) updateData.showResume = body.showResume;
   if (body.isPublic !== undefined) updateData.isPublic = body.isPublic;
 
-  const user = await prisma.user.update({
-    where: { supabaseId: authUser.id },
-    data: updateData,
-  });
+  try {
+    const user = await prisma.user.update({
+      where: { supabaseId: authUser.id },
+      data: updateData,
+    });
 
-  return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null });
+    return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null });
+  } catch (err: unknown) {
+    console.error("[PATCH /api/users/profile]", err);
+    return NextResponse.json<ApiResponse<null>>(
+      { data: null, error: { message: "Failed to update profile. Please try again.", code: "UPDATE_FAILED" } },
+      { status: 500 }
+    );
+  }
 }
