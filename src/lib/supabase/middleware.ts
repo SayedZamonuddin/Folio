@@ -36,21 +36,18 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Redirect unauthenticated users trying to access dashboard
   if (!user && path.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect unauthenticated users trying to access onboarding
   if (!user && path.startsWith("/onboarding")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
   if (user && (path.startsWith("/login") || path.startsWith("/signup"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

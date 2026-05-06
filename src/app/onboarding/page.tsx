@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [username, setUsername] = useState("");
@@ -29,6 +30,25 @@ export default function OnboardingPage() {
 
   const [theme, setTheme] = useState("default");
   const [accentColor, setAccentColor] = useState("#2563eb");
+
+  useEffect(() => {
+    async function checkExistingProfile() {
+      try {
+        const res = await fetch("/api/users/profile");
+        if (res.ok) {
+          const { data } = await res.json();
+          if (data?.username) {
+            router.replace("/dashboard");
+            return;
+          }
+        }
+      } catch {
+        // No profile found, continue with onboarding
+      }
+      setCheckingProfile(false);
+    }
+    checkExistingProfile();
+  }, [router]);
 
   async function checkUsername(value: string) {
     setUsername(value);
@@ -94,6 +114,16 @@ export default function OnboardingPage() {
       setError("Something went wrong. Please try again.");
       setLoading(false);
     }
+  }
+
+  if (checkingProfile) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

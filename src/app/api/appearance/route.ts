@@ -25,10 +25,18 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const user = await prisma.user.update({
-    where: { supabaseId: authUser.id },
-    data: result.data,
-  });
+  try {
+    const user = await prisma.user.update({
+      where: { supabaseId: authUser.id },
+      data: result.data,
+    });
 
-  return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null });
+    return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null });
+  } catch (err) {
+    console.error("[PATCH /api/appearance]", err);
+    return NextResponse.json<ApiResponse<null>>(
+      { data: null, error: { message: "Failed to save appearance. Please try again.", code: "UPDATE_FAILED" } },
+      { status: 500 }
+    );
+  }
 }
