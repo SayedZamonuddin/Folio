@@ -27,7 +27,7 @@ export default function SettingsPage() {
       bio: "",
       location: "",
       pronouns: "",
-      availabilityStatus: "not_specified" as const,
+      availabilityStatus: "not_specified" as (typeof AVAILABILITY_STATUSES)[number],
       availabilityNote: "",
     },
   });
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                     <Label>Availability</Label>
                     <Select
                       value={profileForm.watch("availabilityStatus")}
-                      onValueChange={(val) => { if (val) profileForm.setValue("availabilityStatus", val as typeof AVAILABILITY_STATUSES[number]); }}
+                      onValueChange={(val) => { if (val) profileForm.setValue("availabilityStatus", val as (typeof AVAILABILITY_STATUSES)[number]); }}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
