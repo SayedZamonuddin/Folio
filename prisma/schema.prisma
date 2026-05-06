@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  supabaseId     String    @unique
+  email          String    @unique
+  username       String    @unique
+  fullName       String
+  headline       String?
+  bio            String?   @db.Text
+  avatarUrl      String?
+  coverImageUrl  String?
+  resumeUrl      String?
+  location       String?
+  pronouns       String?
+  availabilityStatus String @default("not_specified")
+  availabilityNote   String?
+
+  websiteUrl     String?
+  linkedinUrl    String?
+  githubUrl      String?
+  twitterUrl     String?
+  dribbbleUrl    String?
+  behanceUrl     String?
+  youtubeUrl     String?
+  mediumUrl      String?
+  devtoUrl       String?
+  emailPublic    String?
+  calendarUrl    String?
+
+  theme          String    @default("default")
+  accentColor    String    @default("#2563eb")
+  fontFamily     String    @default("inter")
+  darkMode       Boolean   @default(false)
+
+  sectionOrder   String[]  @default(["about", "projects", "experience", "education", "skills", "testimonials"])
+
+  isPublic       Boolean   @default(true)
+  showResume     Boolean   @default(true)
+  password       String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  projects       Project[]
+  experiences    Experience[]
+  education      Education[]
+  skills         Skill[]
+  certifications Certification[]
+  publications   Publication[]
+  testimonials   Testimonial[]
+  customSections CustomSection[]
+  socialLinks    SocialLink[]
+  analytics      PortfolioView[]
+
+  @@index([username])
+  @@index([supabaseId])
+}
+
+model Project {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String
+  summary         String?   @db.Text
+  role            String?
+  thumbnailUrl    String?
+
+  problemStatement String?  @db.Text
+  process          String?  @db.Text
+  outcome          String?  @db.Text
+  content          String?  @db.Text
+
+  liveUrl         String?
+  sourceUrl       String?
+  caseStudyUrl    String?
+
+  tags            String[]
+  category        String?
+  teamSize        String?
+  duration        String?
+  startDate       DateTime?
+  endDate         DateTime?
+
+  featured        Boolean   @default(false)
+  status          String    @default("published")
+  sortOrder       Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  media           Media[]
+  techStack       ProjectTech[]
+
+  @@index([userId])
+  @@index([userId, status, sortOrder])
+}
+
+model ProjectTech {
+  id          String  @id @default(uuid())
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  iconUrl     String?
+  url         String?
+  sortOrder   Int     @default(0)
+
+  @@index([projectId])
+}
+
+model Media {
+  id          String   @id @default(uuid())
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  url         String
+  thumbnailUrl String?
+  type        String
+  mimeType    String?
+  fileName    String?
+  fileSize    Int?
+  caption     String?
+  altText     String?
+
+  embedUrl    String?
+  embedType   String?
+
+  codeContent String?  @db.Text
+  codeLanguage String?
+
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Experience {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  company       String
+  companyUrl    String?
+  role          String
+  employmentType String?
+  description   String?   @db.Text
+  logoUrl       String?
+  location      String?
+  locationType  String?
+  startDate     DateTime
+  endDate       DateTime?
+  tags          String[]
+
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Education {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  institution   String
+  institutionUrl String?
+  degree        String
+  field         String?
+  description   String?   @db.Text
+  logoUrl       String?
+  grade         String?
+  startDate     DateTime
+  endDate       DateTime?
+  activities    String[]
+
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Skill {
+  id          String  @id @default(uuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  category    String
+  proficiency Int?
+  yearsOfExp  Int?
+  iconUrl     String?
+  sortOrder   Int     @default(0)
+
+  @@index([userId])
+  @@unique([userId, name])
+}
+
+model Certification {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name            String
+  issuingOrg      String
+  issuingOrgUrl   String?
+  logoUrl         String?
+  credentialId    String?
+  credentialUrl   String?
+  issueDate       DateTime
+  expiryDate      DateTime?
+  description     String?
+
+  sortOrder       Int       @default(0)
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Publication {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title         String
+  type          String
+  publisher     String?
+  url           String?
+  thumbnailUrl  String?
+  description   String?   @db.Text
+  publishedDate DateTime?
+  coAuthors     String[]
+  doi           String?
+  citations     Int?
+
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Testimonial {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  authorName    String
+  authorRole    String?
+  authorAvatar  String?
+  authorUrl     String?
+  content       String    @db.Text
+  relationship  String?
+  projectId     String?
+  featured      Boolean   @default(false)
+  isVisible     Boolean   @default(true)
+
+  requestEmail  String?
+  requestStatus String    @default("received")
+  requestToken  String?   @unique
+
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([requestToken])
+}
+
+model CustomSection {
+  id        String @id @default(uuid())
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String
+  icon      String?
+  content   String? @db.Text
+  layout    String  @default("list")
+
+  items     CustomSectionItem[]
+
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CustomSectionItem {
+  id          String  @id @default(uuid())
+  sectionId   String
+  section     CustomSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  title       String
+  subtitle    String?
+  description String? @db.Text
+  url         String?
+  imageUrl    String?
+  date        DateTime?
+  endDate     DateTime?
+  tags        String[]
+
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([sectionId])
+}
+
+model SocialLink {
+  id        String @id @default(uuid())
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  platform  String
+  url       String
+  label     String?
+  iconUrl   String?
+
+  sortOrder Int    @default(0)
+
+  @@index([userId])
+}
+
+model PortfolioView {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  viewedAt    DateTime @default(now())
+  referrer    String?
+  country     String?
+  device      String?
+  browser     String?
+  path        String?
+  sessionId   String?
+  duration    Int?
+
+  @@index([userId, viewedAt])
+  @@index([userId, referrer])
+}

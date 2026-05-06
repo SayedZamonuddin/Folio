@@ -1,0 +1,21 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+
+export default function Error({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
+      <h1 className="text-6xl font-bold">500</h1>
+      <p className="mt-4 text-xl text-muted-foreground">Something went wrong.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        An unexpected error occurred. Please try again.
+      </p>
+      <div className="mt-8 flex gap-4">
+        <Button onClick={reset}>Try Again</Button>
+        <Button variant="outline" onClick={() => (window.location.href = "/")}>
+          Go Home
+        </Button>
+      </div>
+    </div>
+  );
+}
