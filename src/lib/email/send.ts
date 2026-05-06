@@ -1,4 +1,4 @@
-import { resend, EMAIL_FROM } from "./resend";
+import { getResend, EMAIL_FROM } from "./resend";
 
 interface SendEmailOptions {
   to: string;
@@ -12,7 +12,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
     return { success: true, id: "dev-skipped" };
   }
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: EMAIL_FROM,
     to,
     subject,
