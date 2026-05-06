@@ -45,20 +45,29 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const user = await prisma.user.create({
-    data: {
-      supabaseId: authUser.id,
-      email: authUser.email!,
-      username: body.username,
-      fullName: body.fullName,
-      headline: body.headline || null,
-      bio: body.bio || null,
-      theme: body.theme || "default",
-      accentColor: body.accentColor || "#2563eb",
-    },
-  });
+  try {
+    const user = await prisma.user.create({
+      data: {
+        supabaseId: authUser.id,
+        email: authUser.email!,
+        username: body.username,
+        fullName: body.fullName,
+        headline: body.headline || null,
+        bio: body.bio || null,
+        theme: body.theme || "default",
+        accentColor: body.accentColor || "#2563eb",
+      },
+    });
 
-  return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null }, { status: 201 });
+    return NextResponse.json<ApiResponse<typeof user>>({ data: user, error: null }, { status: 201 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[POST /api/users/profile]", message);
+    return NextResponse.json<ApiResponse<null>>(
+      { data: null, error: { message, code: "CREATE_FAILED" } },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(request: Request) {
