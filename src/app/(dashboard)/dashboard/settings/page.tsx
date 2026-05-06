@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { profileSchema, socialLinksSchema } from "@/lib/validations/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AVAILABILITY_STATUSES } from "@/lib/constants";
 
-type ProfileData = z.infer<typeof profileSchema>;
-type SocialData = z.infer<typeof socialLinksSchema>;
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -169,7 +166,7 @@ export default function SettingsPage() {
                     <Label>Availability</Label>
                     <Select
                       value={profileForm.watch("availabilityStatus")}
-                      onValueChange={(val) => { if (val) profileForm.setValue("availabilityStatus", val as any); }}
+                      onValueChange={(val) => { if (val) profileForm.setValue("availabilityStatus", val as typeof AVAILABILITY_STATUSES[number]); }}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>

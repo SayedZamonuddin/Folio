@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { EMPLOYMENT_TYPES } from "@/lib/constants";
 
 export const experienceSchema = z.object({
   company: z.string().min(1, "Company is required").max(200),
